@@ -2,6 +2,33 @@ import prisma from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const verifyToken = async (token) => {
+  const tokenEntry = await prisma.token.findUnique({
+    where: { token },
+  });
+
+  if (!tokenEntry || tokenEntry.expiresAt < new Date()) {
+    throw new Error("Invalid or expired token");
+  }
+  return tokenEntry;
+};
+
+const revokeToken = async (token) => {
+  await prisma.token.delete({
+    where: { token },
+  });
+};
+
+const createTokenEntry = async (userId, token) => {
+  return await prisma.token.create({
+    data: {
+      userId,
+      token,
+      expiresAt: new Date(Date.now() + 3600000), // 1 час
+    },
+  });
+};
+
 const ERROR_MESSAGES = {
   invalidInput: "Invalid input",
   internalServerError: "Internal server error",
@@ -44,6 +71,10 @@ export default async function handler(req, res) {
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+
+    await createTokenEntry(user.id, token);
+    console.log(token, user.id);
+
     return res.status(201).json({ token });
   } catch (error) {
     console.error(error);

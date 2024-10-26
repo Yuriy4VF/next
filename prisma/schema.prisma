@@ -8,7 +8,18 @@ generator client {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
+  id        Int     @id @default(autoincrement())
+  username  String  @unique
+  password  String
+  tokens    Token[] @relation("User Tokens")
+}
+
+model Token {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String
+  expiresAt DateTime
+  user      User     @relation("User Tokens", fields: [userId], references: [id])
+
+  @@unique([userId, token]) // Убедитесь, что токены уникальны для каждого пользователя
 }
