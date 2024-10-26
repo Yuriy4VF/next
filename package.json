@@ -17,6 +17,8 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.8.1",
     "@types/react": "18.3.12",
     "eslint": "^8",
