@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -43,10 +43,6 @@ const ErrorMessage = styled(Typography)`
   color: red;
 `;
 
-const SuccessMessage = styled(Typography)`
-  color: green;
-`;
-
 const StyledTextField = styled(TextField)`
   background-color: rgba(255, 255, 255, 0.1);
   color: white;
@@ -66,12 +62,10 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-const LoginForm = () => {
+const LoginForm = ({ onSubmit, errorMessage }) => {
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(loginSchema),
@@ -80,30 +74,6 @@ const LoginForm = () => {
       password: "",
     },
   });
-
-  const [successMessage, setSuccessMessage] = useState("");
-
-  const onSubmit = async ({ username, password }) => {
-    clearErrors();
-    setSuccessMessage("");
-
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      setSuccessMessage("Login successful!");
-    } else {
-      const data = await response.json();
-      setError("root", { message: data.error || "Login failed" });
-    }
-  };
 
   return (
     <StyledContainer maxWidth="sm">
@@ -128,8 +98,7 @@ const LoginForm = () => {
           error={!!errors.password}
           helperText={errors.password ? errors.password.message : ""}
         />
-        {errors.root && <ErrorMessage>{errors.root.message}</ErrorMessage>}
-        {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         <StyledButton type="submit" variant="contained" color="primary">
           Login
         </StyledButton>
