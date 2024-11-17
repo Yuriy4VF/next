@@ -1,4 +1,8 @@
+// "use client";
+
 import { Inter } from "next/font/google";
+
+import ReduxProvider from "../components/ReduxProvider";
 import "./globals.css";
 
 import Navbar from "../components/Navbar";
@@ -15,9 +19,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <div className="container">
-          <Navbar />
-
-          {children}
+          <ReduxProvider>
+            <Navbar />
+            {children}{" "}
+          </ReduxProvider>
         </div>
       </body>
     </html>

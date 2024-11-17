@@ -1,38 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import LoginForm from "../../../components/forms/LoginForm";
 
+import { login, clearMessages } from "../../../store/authSlice";
+import { useRouter } from "next/router";
+
 const LoginPage = () => {
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { errorMessage, successMessage } = useSelector((state) => state.auth);
 
   const handleLogin = async ({ username, password }) => {
-    setErrorMessage("");
-    setSuccessMessage("");
-
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      setSuccessMessage("Login successful!");
-    } else {
-      const data = await response.json();
-      setErrorMessage(data.error || "Login failed");
-    }
+    dispatch(clearMessages()); // Очистить сообщения перед новой попыткой входа
+    dispatch(login({ username, password }));
   };
+
+  useEffect(() => {
+    if (successMessage) {
+      router.push("/chat");
+    }
+  }, [successMessage, router]);
 
   return (
     <div>
       <h3>LoginPage</h3>
       {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+
       <LoginForm onSubmit={handleLogin} errorMessage={errorMessage} />
     </div>
   );
